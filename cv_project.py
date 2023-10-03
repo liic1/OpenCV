@@ -38,12 +38,10 @@ ap.add_argument("-v", "--video", type=str, default="",
 	help="path to input video file")
 args = vars(ap.parse_args())
 
-# define two constants, one for the eye aspect ratio to indicate
-# blink and then a second constant for the number of consecutive
-# frames the eye must be below the threshold
-EYE_AR_THRESH = 0.3
-EYE_AR_CONSEC_FRAMES = 150 # make this higher-- the more frames their eyes are closed the more likely they are asleep
-# initialize the frame counters and the total number of blinks
+
+EYE_AR_THRESH = 0.3 # threshold for when to consider the eyes "closed"
+EYE_AR_CONSEC_FRAMES = 150 # amount of frames that EAR can be below variable above before considered asleep
+# initialize the frame counters that determine whether asleep or not
 COUNTER = 0
 TOTAL = 0
 
@@ -54,8 +52,7 @@ detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(args["shape_predictor"])
 
 
-# grab the indexes of the facial landmarks for the left and
-# right eye, respectively
+# grab indexes of the facial landmarks for the left and right eye
 (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
 (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
