@@ -1,7 +1,11 @@
 # OpenCV
 Open CV Project for AHCS
 
-Before anything, download the 
+Before anything, download the files titled "" and "". These are the trained facial landmark dataset
+and the alarm sound files respectively. Hopefully they all end up in the same folder. 
+
+Then, in your command line, run this line: python cv_project.py \--shape-predictor shape_predictor_68_face_landmarks.dat
+
 
 Download the 
 
