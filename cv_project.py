@@ -103,8 +103,8 @@ while True:
         if ear < EYE_AR_THRESH:
             COUNTER += 1 # counts how many frames the eyes are closed
             if COUNTER >= EYE_AR_CONSEC_FRAMES:
-                cv2.putText(frame, "ASLEEP", (450, 50), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (0, 0, 255), 5)
-                cv2.putText(frame, "WAKE UP! WAKE UP!", (10, 300), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (0, 0, 255), 5) 
+                cv2.putText(frame, "ASLEEP", (350, 50), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (0, 0, 255), 5)
+                cv2.putText(frame, "WAKE UP! WAKE UP!", (310, 500), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (0, 0, 255), 5) 
                 sound.play()
                 if (thic<16):
                     thic += 2
