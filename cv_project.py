@@ -14,9 +14,14 @@ from pygame import mixer
 import os
 
 
+# loading alarm sound
 mixer.init()
 sound = mixer.Sound(f'{os.getcwd()}//old-mechanic-alarm-clock-140410.wav')
 
+
+# function that calculates the EAR (eye aspect ratio)
+#   the very cool mathematical formula using the points of facial landmarking on eyes
+#   drops in number when eyes are closed, basically indicating through math that someone has shut their eyes
 def eye_aspect_ratio(eye):
 	# compute the euclidean distances between the two sets of
 	# vertical eye landmarks (x, y)-coordinates
@@ -31,6 +36,7 @@ def eye_aspect_ratio(eye):
 	return ear
 
 
+# load in 
 ap = argparse.ArgumentParser()
 ap.add_argument("-p", "--shape-predictor", required=True,
 	help="path to facial landmark predictor")
@@ -39,32 +45,32 @@ ap.add_argument("-v", "--video", type=str, default="",
 args = vars(ap.parse_args())
 
 
-EYE_AR_THRESH = 0.3 # threshold for when to consider the eyes "closed"
-EYE_AR_CONSEC_FRAMES = 150 # amount of frames that EAR can be below variable above before considered asleep
+# our general thresholds: 
+EYE_AR_THRESH = 0.3 # threshold for when to consider the eyes "closed"; EAR having a value of .3
+EYE_AR_CONSEC_FRAMES = 150 # amount of frames that EAR can be below variable above before considered asleep (not sure how long this is tbh)
+
 # initialize the frame counters that determine whether asleep or not
 COUNTER = 0
 TOTAL = 0
 
-# initialize dlib's face detector (HOG-based) and then create
-# the facial landmark predictor
+# initialize dlib's face detector (HOG-based) 
 print("[INFO] loading facial landmark predictor...")
 detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor(args["shape_predictor"])
+predictor = dlib.shape_predictor(args["shape_predictor"]) # create facial landmark predictor
 
 
-# grab indexes of the facial landmarks for the left and right eye
+# grab indexes of the facial landmarks for the left and right eye (they have their own points on the facial landmark map)
 (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
 (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
 # start the video stream thread
 print("[INFO] starting video stream thread...")
 vs = FileVideoStream(args["video"]).start()
-#fileStream = True
 vs = VideoStream(src=0).start()
 # vs = VideoStream(usePiCamera=True).start()
 fileStream = False
 time.sleep(1.0)
-thic = 2
+thic = 2 # thickness of the border that flashes when the alarm starts
 
 # looping over frames-- while loop ensures it runs infinitely
 # grab the frame from the threaded video file stream, resize
@@ -72,7 +78,7 @@ thic = 2
 # channels)
 while True:
     frame = vs.read()
-    frame = imutils.resize(frame, width=900)
+    frame = imutils.resize(frame, width=900) # resize frame 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # convert to grayscale
 	# detect faces in the grayscale frame
     rects = detector(gray, 0) # using dlib library
@@ -81,13 +87,13 @@ while True:
 		# finds facial landmarks using dlib and puts them in np array
         shape = predictor(gray, rect)
         shape = face_utils.shape_to_np(shape)
-		# extract the left and right eye coordinates, then use the
-		# coordinates to compute the eye aspect ratio for both eyes
+		# get the left and right eye coordinates & use the
+		# coordinates to compute the eye aspect ratio for both eyes (using EAR function we created earlier :D)
         leftEye = shape[lStart:lEnd]
         rightEye = shape[rStart:rEnd]
         leftEAR = eye_aspect_ratio(leftEye)
         rightEAR = eye_aspect_ratio(rightEye)
-		# average the eye aspect ratio together for both eyes
+		# average the eye aspect ratio together for both eyes (winks wont count now!)
         ear = (leftEAR + rightEAR) / 2.0
         
         # compute the convex hull for the left and right eye, then
@@ -104,7 +110,7 @@ while True:
             COUNTER += 1 # counts how many frames the eyes are closed
             if COUNTER >= EYE_AR_CONSEC_FRAMES:
                 cv2.putText(frame, "ASLEEP", (350, 50), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (0, 0, 255), 5)
-                cv2.putText(frame, "WAKE UP! WAKE UP!", (310, 500), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (0, 0, 255), 5) 
+                cv2.putText(frame, "WAKE UP! WAKE UP!", (180, 500), cv2.FONT_HERSHEY_TRIPLEX, 1.7, (0, 0, 255), 5) 
                 sound.play()
                 if (thic<16):
                     thic += 2
@@ -112,7 +118,7 @@ while True:
                 else:
                     thic -= 2
                     if(thic<2):
-                        thic = 2
+                        thic = 2 # set border to 2 and then get rid of it repeatedly
                     cv2.rectangle(frame, (0,0), (width, height), (0,0,255), thickness=thic)
         else:
             COUNTER = 0
@@ -128,8 +134,8 @@ while True:
         #     COUNTER = 0
         # draw the total number of blinks on the frame along with
 		# the computed eye aspect ratio for the frame
-        cv2.putText(frame, "Time Slept: {}".format(TOTAL), (10, 30),
-			cv2.FONT_HERSHEY_TRIPLEX, 0.7, (0, 0, 0), 2)
+        #cv2.putText(frame, "Time Slept: {}".format(TOTAL), (10, 30),
+			#cv2.FONT_HERSHEY_TRIPLEX, 0.7, (0, 0, 0), 2)
         cv2.putText(frame, "EAR: {:.2f}".format(ear), (300, 30),
 			cv2.FONT_HERSHEY_TRIPLEX, 0.7, (0, 0, 0), 2)
         
@@ -149,8 +155,11 @@ vs.stop()
 
 
 
+# miscelaneous stuff from when I was brainstorming
 
-# miscelaneous stuff....
+
+
+
 
 # # 3: load and display
 # ap = argparse.ArgumentParser()
